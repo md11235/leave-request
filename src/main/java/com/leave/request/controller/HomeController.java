@@ -26,7 +26,7 @@ import com.leave.request.service.RequestService;
 import com.leave.request.service.UserService;
 import com.leave.request.util.SecurityUtil;
 import com.leave.request.validator.UserValidator;
-import com.mysql.jdbc.Security;
+// import com.mysql.jdbc.Security;
 
 /**
  * @author Eraine

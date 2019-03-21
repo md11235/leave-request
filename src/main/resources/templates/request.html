@@ -60,7 +60,14 @@
 												<label class="control-label" th:if="${#fields.hasErrors('reason')}" th:errors="*{reason}"></label>
 												<textarea class="form-control" th:field="*{reason}" placeholder="Input reason"></textarea>
 											</div>
-											
+
+
+											<div th:class="${#fields.hasErrors('file1') ? 'form-group  has-error' : 'form-group'}">
+												<label class="control-label" th:if="${#fields.hasErrors('file1')}" th:errors="*{reason}"></label>
+												<input type="file" class="form-control" id="file1" th:field="*{file1}" placeholder="上传文件"/>
+											</div>
+
+
 											<input type="submit" class="btn btn-lg btn-primary btn-block" value="Submit"/>
 	                        			</fieldset>
 	                        		</form>

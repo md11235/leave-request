@@ -13,11 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.leave.request.constants.RequestStatusEnum;
@@ -57,13 +54,16 @@ public class RequestController {
 	}
 
 	@PostMapping("/request")
-	public String processRequest(@ModelAttribute("requestForm") LeaveRequest leaveRequest, BindingResult bindingResult,
+	public String processRequest(@ModelAttribute("requestForm") LeaveRequest leaveRequest,
+								 @RequestParam("file1") MultipartFile file1,
+								 BindingResult bindingResult,
 			Model model) {
 		validator.validate(leaveRequest, bindingResult);
 
 		if (bindingResult.hasErrors()) {
 			return "request";
 		}
+
 
 		requestService.save(leaveRequest);
 		requestService.submit(leaveRequest);

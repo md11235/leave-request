@@ -60,6 +60,8 @@ public class LeaveRequest extends BaseModel {
 	@Column(name = "approved_by")
 	private String approvedBy;
 
+	private String file1;
+
 	public LeaveRequest() {
 	}
 
@@ -194,7 +196,13 @@ public class LeaveRequest extends BaseModel {
 	public void setApprovedBy(String approvedBy) {
 		this.approvedBy = approvedBy;
 	}
-	
-	
 
+
+	public String getFile1() {
+		return file1;
+	}
+
+	public void setFile1(String file1) {
+		this.file1 = file1;
+	}
 }
