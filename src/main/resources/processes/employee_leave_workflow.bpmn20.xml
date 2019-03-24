@@ -8,16 +8,13 @@
 	
 	<process id="employeeLeaveWorkflow" name="Employee with Return Workflow" isExecutable="true">
 		<startEvent id="startevent1" name="Start" flowable:initiator="employeeUsername"></startEvent>
-		<sequenceFlow id="flow1" sourceRef="startevent1"
-			targetRef="submitRequestTask"></sequenceFlow>
+		<sequenceFlow id="flow1" sourceRef="startevent1" targetRef="submitRequestTask"></sequenceFlow>
 		<userTask id="submitRequestTask" name="Submit" flowable:assignee="${employeeUsername}"></userTask>
-		<sequenceFlow id="flow2" sourceRef="submitRequestTask"
-			targetRef="tlReviewSubProcess"></sequenceFlow>
+		<sequenceFlow id="flow2" sourceRef="submitRequestTask" targetRef="tlReviewSubProcess"></sequenceFlow>
 
 		<subProcess id="tlReviewSubProcess" name="Team Lead Review Sub Process">
 			<startEvent id="startevent2" name="Start"></startEvent>
-			<sequenceFlow id="flow3" sourceRef="startevent2"
-				targetRef="tlReviewTask"></sequenceFlow>
+			<sequenceFlow id="flow3" sourceRef="startevent2" targetRef="tlReviewTask"></sequenceFlow>
 			<userTask id="tlReviewTask" name="Team Lead Review" flowable:candidateGroups="team_lead">
 				<documentation>Team Lead Review</documentation>
 				<extensionElements>
@@ -26,8 +23,7 @@
 				</extensionElements>
 			</userTask>
 
-			<sequenceFlow id="flow4" sourceRef="tlReviewTask"
-				targetRef="exclusivegateway1"></sequenceFlow>
+			<sequenceFlow id="flow4" sourceRef="tlReviewTask" targetRef="exclusivegateway1"></sequenceFlow>
 			<exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
 
 			<sequenceFlow id="flow5" sourceRef="exclusivegateway1"
@@ -39,32 +35,30 @@
 			</sequenceFlow>
 			<endEvent id="endevent1" name="End"></endEvent>
 
-			<sequenceFlow id="flow6" sourceRef="exclusivegateway1"
-				targetRef="errorendevent1">
+			<sequenceFlow id="flow6" sourceRef="exclusivegateway1" targetRef="errorendevent1">
 				<extensionElements>
 					<flowable:executionListener event="end" expression="${requestListener.onReject(execution)}"></flowable:executionListener>
 				</extensionElements>	
 				<conditionExpression xsi:type="tFormalExpression"><![CDATA[${!isApproved}]]></conditionExpression>
 			</sequenceFlow>
+
 			<endEvent id="errorendevent1" name="ErrorEnd">
 				<errorEventDefinition errorRef="rejected"></errorEventDefinition>
 			</endEvent>
 		</subProcess>
 
-		<sequenceFlow id="flow7" sourceRef="boundaryerror1"
-			targetRef="submitRequestTask"></sequenceFlow>
+		<sequenceFlow id="flow7" sourceRef="boundaryerror1" targetRef="submitRequestTask"></sequenceFlow>
 		<boundaryEvent id="boundaryerror1" name="Error"
 			attachedToRef="tlReviewSubProcess">
 			<errorEventDefinition errorRef="rejected"></errorEventDefinition>
 		</boundaryEvent>
 
-		<sequenceFlow id="flow8" sourceRef="tlReviewSubProcess"
-			targetRef="managerReviewSubProcess"></sequenceFlow>
+		<sequenceFlow id="flow8" sourceRef="tlReviewSubProcess" targetRef="managerReviewSubProcess"></sequenceFlow>
 
 		<subProcess id="managerReviewSubProcess" name="Manager Review Sub Process">
 			<startEvent id="startevent3" name="Start"></startEvent>
-			<sequenceFlow id="flow9" sourceRef="startevent3"
-				targetRef="managerReviewTask"></sequenceFlow>
+			<sequenceFlow id="flow9" sourceRef="startevent3" targetRef="managerReviewTask"></sequenceFlow>
+
 			<userTask id="managerReviewTask" name="Manager Review" flowable:candidateGroups="manager">
 				<extensionElements>
 					<flowable:taskListener event="create" expression="${requestListener.onCreateManagerReview(execution, task)}"></flowable:taskListener>
