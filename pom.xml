@@ -40,6 +40,8 @@
 		<datepicker.version>1.7.1</datepicker.version>
 		<bootstrap-table.version>1.9.1</bootstrap-table.version>
 		<momentjs.version>2.18.1</momentjs.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
 
 	<dependencies>
@@ -148,7 +150,6 @@
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
 		</dependency>
-
 	</dependencies>
 
 	<build>
@@ -157,8 +158,8 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<!--<source>1.8</source>-->
+					<!--<target>1.8</target>-->
 				</configuration>
 			</plugin>
 		</plugins>
