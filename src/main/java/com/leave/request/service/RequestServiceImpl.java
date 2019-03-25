@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.leave.request.dto.RequestApprovalDto;
-import com.leave.request.model.LeaveRequest;
+import com.leave.request.model.ConstructionFlowRequest;
 import com.leave.request.repository.LeaveRequestRepository;
 import com.leave.request.util.SecurityUtil;
 
@@ -50,12 +50,12 @@ public class RequestServiceImpl implements RequestService {
 	private TaskService taskService;
 
 	@Override
-	public List<LeaveRequest> findAllByUsername(String username) {
+	public List<ConstructionFlowRequest> findAllByUsername(String username) {
 		return leaveRequestRepository.findAllByCreateBy(username);
 	}
 
 	@Override
-	public void save(LeaveRequest leaveRequest) {
+	public void save(ConstructionFlowRequest leaveRequest) {
 		leaveRequestRepository.save(leaveRequest);
 	}
 
@@ -70,9 +70,9 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-	public void submit(LeaveRequest leaveRequest, MultipartFile file) {
+	public void submit(ConstructionFlowRequest leaveRequest, MultipartFile file) {
 		Deployment deployment = repositoryService.createDeployment()
-				.addClasspathResource("processes/employee_leave_workflow.bpmn20.xml").deploy();
+				.addClasspathResource("processes/Municipal_Landscape_Flow.bpmn20.xml").deploy();
 		ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery()
 				.deploymentId(deployment.getId()).singleResult();
 
@@ -105,20 +105,7 @@ public class RequestServiceImpl implements RequestService {
 		taskService.setVariables(task.getId(), variables);
 
 
-		if(file != null) {
-            try {
-                taskService.createAttachment(
-                        file.getContentType(),
-                        task.getId(),
-                        processInstance.getId(),
-                        file.getOriginalFilename(),
-                        file.getName(),
-                        file.getInputStream()
-                );
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        attachFileToTask(task, file);
 
         taskService.complete(task.getId());
 
@@ -127,19 +114,36 @@ public class RequestServiceImpl implements RequestService {
         }
 	}
 
-	@Override
+    private void attachFileToTask(Task task, MultipartFile file) {
+        if(file != null) {
+            try {
+                taskService.createAttachment(
+                file.getContentType(),
+                task.getId(),
+                task.getProcessInstanceId(),
+                file.getOriginalFilename(),
+                file.getName(),
+                file.getInputStream()
+                );
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
 	public void sendAlert(DelegateExecution execution) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public LeaveRequest findById(Long id) {
+	public ConstructionFlowRequest findById(Long id) {
 		return leaveRequestRepository.findOne(id);
 	}
 
 	@Override
-	public void approveOrReject(RequestApprovalDto requestApprovalDto) {
+	public void approveOrReject(RequestApprovalDto requestApprovalDto, MultipartFile file) {
 		logger.info("start: approveOrReject");
 		Task task = taskService.createTaskQuery().taskId(requestApprovalDto.getTaskId()).includeProcessVariables()
 				.singleResult();
@@ -152,7 +156,10 @@ public class RequestServiceImpl implements RequestService {
 		runtimeService.setVariable(task.getExecutionId(), "isApproved", requestApprovalDto.getIsApproved());
 		taskService.setAssignee(task.getId(), SecurityUtil.getUsername());
 		taskService.addComment(task.getId(), task.getProcessInstanceId(), requestApprovalDto.getComment() != null ? requestApprovalDto.getComment() : "");
+        attachFileToTask(task, file);
+
 		taskService.complete(task.getId());
+
 		logger.info("end: approveOrReject");
 	}
 

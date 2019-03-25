@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+xmlns:activiti="http://activiti.org/bpmn"
+xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
+xmlns:flowable="http://flowable.org/bpmn"
+typeLanguage="http://www.w3.org/2001/XMLSchema"
+expressionLanguage="http://www.w3.org/1999/XPath"
+targetNamespace="http://www.flowable.org/processdef">
+
+<process id="employee_return_workflow" name="Employee with Return Workflow" isExecutable="true">
+  <startEvent id="startevent1" name="Start" flowable:initiator="employeeUsername"></startEvent>
+  <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="submitRequestTask"></sequenceFlow>
+  <userTask id="submitRequestTask" name="Submit" flowable:assignee="${employeeUsername}"></userTask>
+  <sequenceFlow id="flow2" sourceRef="submitRequestTask" targetRef="tlReviewSubProcess"></sequenceFlow>
+
+  <subProcess id="tlReviewSubProcess" name="Team Lead Review Sub Process">
+    <startEvent id="startevent2" name="Start" flowable:initiator="reviewer"></startEvent>
+    <sequenceFlow id="flow3" sourceRef="startevent2" targetRef="tlReviewTask"></sequenceFlow>
+    <userTask id="tlReviewTask" name="Team Lead Review" flowable:candidateGroups="team_lead">
+      <documentation>Team Lead Review</documentation>
+      <extensionElements>
+        <flowable:taskListener event="create" expression="${requestService.teamLeadReview(execution, task)}"></flowable:taskListener>
+      </extensionElements>
+    </userTask>
+
+    <sequenceFlow id="flow4" sourceRef="tlReviewTask" targetRef="exclusivegateway1"></sequenceFlow>
+    <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
+
+    <sequenceFlow id="flow5" sourceRef="exclusivegateway1" targetRef="endevent1">
+      <extensionElements>
+
+      </extensionElements>
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${isApproved}]]></conditionExpression>
+    </sequenceFlow>
+    <endEvent id="endevent1" name="End"></endEvent>
+
+    <sequenceFlow id="flow6" sourceRef="exclusivegateway1" targetRef="errorendevent1">
+      <extensionElements>
+        <flowable:executionListener event="end" expression="${requestService.logReject(execution)}"></flowable:executionListener>
+      </extensionElements>
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${!isApproved}]]></conditionExpression>
+    </sequenceFlow>
+
+    <endEvent id="errorendevent1" name="ErrorEnd">
+      <errorEventDefinition errorRef="rejected"></errorEventDefinition>
+    </endEvent>
+  </subProcess>
+
+  <sequenceFlow id="flow7" sourceRef="boundaryerror1" targetRef="submitRequestTask"></sequenceFlow>
+
+  <boundaryEvent id="boundaryerror1" name="Error" attachedToRef="tlReviewSubProcess">
+    <errorEventDefinition errorRef="rejected"></errorEventDefinition>
+  </boundaryEvent>
+
+  <sequenceFlow id="flow8" sourceRef="tlReviewSubProcess" targetRef="managerReviewSubProcess"></sequenceFlow>
+
+  <subProcess id="managerReviewSubProcess" name="Manager Review Sub Process">
+    <startEvent id="startevent3" name="Start"></startEvent>
+    <sequenceFlow id="flow9" sourceRef="startevent3" targetRef="managerReviewTask"></sequenceFlow>
+    <userTask id="managerReviewTask" name="Manager Review" flowable:candidateGroups="manager">
+      <extensionElements>
+        <flowable:taskListener event="create" expression="${requestService.managerReview(execution, task)}"></flowable:taskListener>
+      </extensionElements>
+    </userTask>
+
+    <sequenceFlow id="flow10" sourceRef="managerReviewTask" targetRef="exclusivegateway2"></sequenceFlow>
+    <exclusiveGateway id="exclusivegateway2" name="Exclusive Gateway"></exclusiveGateway>
+
+    <sequenceFlow id="flow12" sourceRef="exclusivegateway2" targetRef="errorendevent2">
+      <extensionElements>
+        <flowable:executionListener event="end" expression="${requestService.logReject(execution)}"></flowable:executionListener>
+      </extensionElements>
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${!isApproved}]]></conditionExpression>
+    </sequenceFlow>
+    <endEvent id="errorendevent2" name="ErrorEnd">
+      <errorEventDefinition errorRef="rejected"></errorEventDefinition>
+    </endEvent>
+
+    <sequenceFlow id="flow11" sourceRef="exclusivegateway2" targetRef="endevent2">
+      <extensionElements>
+        <flowable:executionListener event="end" expression="${requestService.logApprove(execution)}"></flowable:executionListener>
+      </extensionElements>
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${isApproved}]]></conditionExpression>
+    </sequenceFlow>
+    <endEvent id="endevent2" name="End"></endEvent>
+  </subProcess>
+
+  <sequenceFlow id="flow13" sourceRef="boundaryerror2" targetRef="tlReviewSubProcess"></sequenceFlow>
+  <boundaryEvent id="boundaryerror2" name="Error" attachedToRef="managerReviewSubProcess">
+    <errorEventDefinition errorRef="rejected"></errorEventDefinition>
+  </boundaryEvent>
+
+  <sequenceFlow id="flow14" sourceRef="managerReviewSubProcess" targetRef="endevent3"></sequenceFlow>
+  <endEvent id="endevent3" name="End"></endEvent>
+</process>
+</definitions>

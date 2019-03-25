@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.leave.request.constants.RequestStatusEnum;
-import com.leave.request.model.LeaveRequest;
+import com.leave.request.model.ConstructionFlowRequest;
 import com.leave.request.repository.LeaveRequestRepository;
 import com.leave.request.service.NotificationService;
 import com.leave.request.util.SecurityUtil;
@@ -50,8 +50,8 @@ public class RequestListenerImpl implements RequestListener {
 	private RuntimeService runtimeService;
 
 	@Override
-	public void onCreateTeamLeadReview(Execution execution, DelegateTask task) {
-		logger.info("start: onCreateTeamLeadReview");
+	public void onCreateCostControlReview(Execution execution, DelegateTask task) {
+		logger.info("start: onCreateCostControlReview");
 		ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
 				.processInstanceId(execution.getProcessInstanceId()).singleResult();
 		String strLeaveId = processInstance.getBusinessKey();
@@ -67,19 +67,17 @@ public class RequestListenerImpl implements RequestListener {
 			taskService.claim(task.getId(), user.getId());
 		}
 
-		// update the status
-		logger.debug("update status...");
-		LeaveRequest leaveRequest = leaveRequestRepository.findOne(Long.valueOf(strLeaveId));
-		leaveRequest.setStatus(RequestStatusEnum.TEAM_LEAD_REVIEW.getValue());
-		leaveRequest.setReviewedBy(SecurityUtil.getUsername());
-		leaveRequestRepository.save(leaveRequest);
+        ConstructionFlowRequest leaveRequest = leaveRequestRepository.findOne(Long.valueOf(strLeaveId));
+        leaveRequest.setStatus(RequestStatusEnum.COST_CONTROL_REVIEW_AWAITING.getValue());
+        leaveRequest.setReviewedBy(SecurityUtil.getUsername());
+        leaveRequestRepository.save(leaveRequest);
 
-		logger.info("end: onCreateTeamLeadReview");
+		logger.info("end: onCreateCostControlReview");
 	}
 
 	@Override
-	public void onCompleteTeamLeadReview(DelegateTask task) {
-		logger.info("start: onCompleteTeamLeadReview");
+	public void onCompleteCostControlReview(DelegateTask task) {
+		logger.info("start: onCompleteCostControlReview");
 		// assign the reviewer, we need this so we'll be able to retrieve who
 		// reviewed it
 		Map<String, Object> variables = task.getVariables();
@@ -93,11 +91,19 @@ public class RequestListenerImpl implements RequestListener {
 			taskService.setVariables(task.getId(), variables);
 		}
 
-		logger.info("end: onCompleteTeamLeadReview");
+        // update the status
+        logger.debug("update status...");
+		String strLeaveId = String.valueOf(variables.get("leaveId"));
+        ConstructionFlowRequest leaveRequest = leaveRequestRepository.findOne(Long.valueOf(strLeaveId));
+        leaveRequest.setStatus(RequestStatusEnum.COST_CONTROL_REVIEW_DONE.getValue());
+        leaveRequest.setReviewedBy(SecurityUtil.getUsername());
+        leaveRequestRepository.save(leaveRequest);
+
+        logger.info("end: onCompleteCostControlReview");
 	}
 
 	@Override
-	public void onCreateManagerReview(Execution execution, DelegateTask task) {
+	public void onCreateEnquiryReview(Execution execution, DelegateTask task) {
 		logger.info("start: onCreateManagerReview");
 		ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
 				.processInstanceId(execution.getProcessInstanceId()).singleResult();
@@ -106,8 +112,8 @@ public class RequestListenerImpl implements RequestListener {
 
 		// update the status
 		logger.debug("update status...");
-		LeaveRequest leaveRequest = leaveRequestRepository.findOne(Long.valueOf(strLeaveId));
-		leaveRequest.setStatus(RequestStatusEnum.MANAGER_REVIEW.getValue());
+		ConstructionFlowRequest leaveRequest = leaveRequestRepository.findOne(Long.valueOf(strLeaveId));
+		leaveRequest.setStatus(RequestStatusEnum.ENQUIRY_REVIEW_AWAITING.getValue());
 		leaveRequest.setReviewedBy(SecurityUtil.getUsername());
 		leaveRequestRepository.save(leaveRequest);
 
@@ -115,20 +121,86 @@ public class RequestListenerImpl implements RequestListener {
 	}
 
 	@Override
-	public void onCompleteManagerReview(DelegateTask task) {
+	public void onCompleteEnquiryReview(DelegateTask task) {
+        logger.info("start: onCompleteEnquiryReview");
+        // assign the reviewer, we need this so we'll be able to retrieve who
+        // reviewed it
+        Map<String, Object> variables = task.getVariables();
+        String reviewer = (String) variables.get("reviewer");
+        logger.debug("previous reviewer: {}", reviewer);
+
+        String new_reviewer = SecurityUtil.getUsername();
+        variables.put("reviewer", new_reviewer);
+        logger.debug("new reviewer: {}", new_reviewer);
+
+        taskService.setVariables(task.getId(), variables);
+
+        // update the status
+        logger.debug("update status...");
+        String strLeaveId = String.valueOf(variables.get("leaveId"));
+        ConstructionFlowRequest leaveRequest = leaveRequestRepository.findOne(Long.valueOf(strLeaveId));
+        leaveRequest.setStatus(RequestStatusEnum.ENQUIRY_REVIEW_DONE.getValue());
+        leaveRequest.setReviewedBy(SecurityUtil.getUsername());
+        leaveRequestRepository.save(leaveRequest);
+
+        logger.info("end: onCompleteEnquiryReview");
 	}
 
-	@Override
+    @Override
+    public void onCreateConstructionReview(Execution execution, DelegateTask task) {
+        logger.info("start: onCreateConstructionReview");
+        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
+                .processInstanceId(execution.getProcessInstanceId()).singleResult();
+
+        String strLeaveId = processInstance.getBusinessKey();
+
+        // update the status
+        logger.debug("update status...");
+        ConstructionFlowRequest leaveRequest = leaveRequestRepository.findOne(Long.valueOf(strLeaveId));
+        leaveRequest.setStatus(RequestStatusEnum.CONSTRUCTION_AWAITING.getValue());
+        leaveRequest.setReviewedBy(SecurityUtil.getUsername());
+        leaveRequestRepository.save(leaveRequest);
+
+        logger.info("end: onCreateConstructReview");
+    }
+
+    @Override
+    public void onCompleteConstructionReview(DelegateTask task) {
+        logger.info("start: onCompleteConstructionReview");
+        // assign the reviewer, we need this so we'll be able to retrieve who
+        // reviewed it
+        Map<String, Object> variables = task.getVariables();
+        String reviewer = (String) variables.get("reviewer");
+        logger.debug("previous reviewer: {}", reviewer);
+
+        String new_reviewer = SecurityUtil.getUsername();
+        variables.put("reviewer", new_reviewer);
+        logger.debug("new reviewer: {}", new_reviewer);
+
+        taskService.setVariables(task.getId(), variables);
+
+        // update the status
+        logger.debug("update status...");
+        String strLeaveId = String.valueOf(variables.get("leaveId"));
+        ConstructionFlowRequest leaveRequest = leaveRequestRepository.findOne(Long.valueOf(strLeaveId));
+        leaveRequest.setStatus(RequestStatusEnum.CONSTRUCTION_DONE.getValue());
+        leaveRequest.setReviewedBy(SecurityUtil.getUsername());
+        leaveRequestRepository.save(leaveRequest);
+
+        logger.info("end: onCompleteConstructionReview");
+    }
+
+    @Override
 	public void onApprove(DelegateExecution execution) {
 		ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
 				.processInstanceId(execution.getProcessInstanceId()).singleResult();
 
 		String strLeaveId = processInstance.getBusinessKey();
 
-		LeaveRequest leaveRequest = leaveRequestRepository.findOne(Long.valueOf(strLeaveId));
-		leaveRequest.setStatus(RequestStatusEnum.APPROVED.getValue());		
-		leaveRequest.setApprovedBy(SecurityUtil.getUsername());
-		leaveRequestRepository.save(leaveRequest);
+//		ConstructionFlowRequest leaveRequest = leaveRequestRepository.findOne(Long.valueOf(strLeaveId));
+//		leaveRequest.setStatus(RequestStatusEnum.APPROVED.getValue());
+//		leaveRequest.setApprovedBy(SecurityUtil.getUsername());
+//		leaveRequestRepository.save(leaveRequest);
 	}
 
 	@Override
@@ -138,9 +210,9 @@ public class RequestListenerImpl implements RequestListener {
 
 		String strLeaveId = processInstance.getBusinessKey();
 
-		LeaveRequest leaveRequest = leaveRequestRepository.findOne(Long.valueOf(strLeaveId));
-		leaveRequest.setStatus(RequestStatusEnum.REJECTED.getValue());
-		leaveRequestRepository.save(leaveRequest);
+//		ConstructionFlowRequest leaveRequest = leaveRequestRepository.findOne(Long.valueOf(strLeaveId));
+//		leaveRequest.setStatus(RequestStatusEnum.REJECTED.getValue());
+//		leaveRequestRepository.save(leaveRequest);
 	}
 
 }

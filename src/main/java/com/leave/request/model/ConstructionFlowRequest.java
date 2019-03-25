@@ -28,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
  */
 @Entity
 @Table(name = "request")
-public class LeaveRequest extends BaseModel {
+public class ConstructionFlowRequest extends BaseModel {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -65,7 +65,7 @@ public class LeaveRequest extends BaseModel {
 	@Transient
 	private MultipartFile file1;
 
-	public LeaveRequest() {
+	public ConstructionFlowRequest() {
 	}
 
 	/**

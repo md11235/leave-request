@@ -3,6 +3,8 @@
  */
 package com.leave.request.dto;
 
+import org.springframework.web.multipart.MultipartFile;
+
 /**
  * @author eotayde
  *
@@ -12,7 +14,9 @@ public class RequestApprovalDto {
 	public String taskId;
 	public String leaveId;
 	public String comment;
-	public Boolean isApproved;
+	public int isApproved;
+
+    private MultipartFile file1;
 
 	public RequestApprovalDto() {
 	}
@@ -68,7 +72,7 @@ public class RequestApprovalDto {
 	/**
 	 * @return the isApproved
 	 */
-	public Boolean getIsApproved() {
+	public int getIsApproved() {
 		return isApproved;
 	}
 
@@ -76,7 +80,7 @@ public class RequestApprovalDto {
 	 * @param isApproved
 	 *            the isApproved to set
 	 */
-	public void setIsApproved(Boolean isApproved) {
+	public void setIsApproved(int isApproved) {
 		this.isApproved = isApproved;
 	}
 
@@ -103,6 +107,11 @@ public class RequestApprovalDto {
 				+ ", isApproved=" + isApproved + "]";
 	}
 
-	
+    public MultipartFile getFile1() {
+        return file1;
+    }
 
+    public void setFile1(MultipartFile file1) {
+        this.file1 = file1;
+    }
 }

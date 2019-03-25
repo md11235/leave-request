@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.leave.request.model.Notification;
-import com.leave.request.model.LeaveRequest;
+import com.leave.request.model.ConstructionFlowRequest;
 import com.leave.request.model.UserModel;
 import com.leave.request.service.NotificationService;
 import com.leave.request.service.MyTaskService;
@@ -102,8 +102,8 @@ public class HomeController {
 	}
 	
 	@GetMapping("/json/get-all-request")
-	public ResponseEntity<List<LeaveRequest>> getAllTasks(Model model) {
-		List<LeaveRequest> requests = requestService.findAllByUsername(SecurityUtil.getUsername());
-		return new ResponseEntity<List<LeaveRequest>>(requests, HttpStatus.OK);
+	public ResponseEntity<List<ConstructionFlowRequest>> getAllTasks(Model model) {
+		List<ConstructionFlowRequest> requests = requestService.findAllByUsername(SecurityUtil.getUsername());
+		return new ResponseEntity<List<ConstructionFlowRequest>>(requests, HttpStatus.OK);
 	}
 }

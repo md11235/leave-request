@@ -102,9 +102,25 @@ public class MyTaskServiceImpl implements MyTaskService {
 		sort(historyTaskList);
 		return historyTaskList;
 	}
-	
-	private MyHistoryTask buildMyHistoryTask(HistoricTaskInstance historicTaskInstance) {
+
+    @Override
+    public List<MyHistoryTask> getHistoricTasks(String userId) {
+        List<HistoricTaskInstance> historicTaskInstances = historyService.createHistoricTaskInstanceQuery()
+                .includeTaskLocalVariables().taskInvolvedUser(userId).list();
+
+        List<MyHistoryTask> historicTaskList = new ArrayList<>();
+        for (HistoricTaskInstance historicTaskInstance : historicTaskInstances) {
+            MyHistoryTask myHistoryTask = buildMyHistoryTask(historicTaskInstance);
+            historicTaskList.add(myHistoryTask);
+        }
+
+        sort(historicTaskList);
+        return historicTaskList;
+    }
+
+    private MyHistoryTask buildMyHistoryTask(HistoricTaskInstance historicTaskInstance) {
 		MyHistoryTask myHistoryTask = new MyHistoryTask();
+
 		myHistoryTask.setId(historicTaskInstance.getId());
 		myHistoryTask.setName(historicTaskInstance.getName());
 		myHistoryTask.setCommentList(taskService.getTaskComments(historicTaskInstance.getId()));

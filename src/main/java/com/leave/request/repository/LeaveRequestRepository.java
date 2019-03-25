@@ -7,13 +7,13 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.leave.request.model.LeaveRequest;
+import com.leave.request.model.ConstructionFlowRequest;
 
 /**
  * @author Eraine
  *
  */
-public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long> {
+public interface LeaveRequestRepository extends JpaRepository<ConstructionFlowRequest, Long> {
 
-	List<LeaveRequest> findAllByCreateBy(String createBy);
+	List<ConstructionFlowRequest> findAllByCreateBy(String createBy);
 }

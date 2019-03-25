@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" 
 		xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-	<title>Mawsi HR</title>
+	<title>计划管理</title>
 	
 	<head th:replace="fragments/header :: header"></head>
 	
@@ -17,7 +17,7 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-lg-12">
-                        <h1 class="page-header">Review Request</h1>
+                        <h1 class="page-header">处理任务</h1>
                     </div>
                     <!-- /.col-lg-12 -->
                 </div>
@@ -31,7 +31,7 @@
                         		<div class="span5 col-md-12">
                         			<div class="panel panel-default">
                         				<div class="panel-heading">
-                        					<strong>Leave ID: <span th:text="${leaveRequest.id}"></span></strong>
+                        					<strong>流程编号: <span th:text="${leaveRequest.id}"></span></strong>
                         				</div>
                         				<div class="panel-body">
                         					<div class="table-responsive">
@@ -44,55 +44,63 @@
                         							</thead>
                         							<tbody>
                         								<tr>
-                        									<td>Request Type</td>
+                        									<td>流程类型</td>
                         									<td th:text="${leaveRequest.requestType.name}"></td>
                         								</tr>
                         								<tr>
-                        									<td>Start Date</td>
+                        									<td>工期计划开始日期</td>
                         									<td th:text="${leaveRequest.startDate}"></td>
                         								</tr>
                         								<tr>
-                        									<td>End Date</td>
+                        									<td>工期计划结束日期</td>
                         									<td th:text="${leaveRequest.endDate}"></td>
                         								</tr>
                         								<tr>
-                        									<td>Reason</td>
+                        									<td>备注</td>
                         									<td th:text="${leaveRequest.reason}"></td>
                         								</tr>
                         								<tr>
-                        									<td>Status</td>
+                        									<td>状态</td>
                         									<td th:text="${leaveRequest.status}"></td>
                         								</tr>
 
-                                                        <tr>
-                                                            <td>Attachments</td>
+                                                        <tr th:each="attachment: ${attachments}">
+                                                            <td>附件</td>
                                                             <td th:text="${attachment.name}"></td>
                                                         </tr>
                         							</tbody>
                         						</table>
-                        					<a th:href="@{/manage}" role="button" class="btn btn-primary">Back</a>                        						
+                        					<a th:href="@{/manage}" role="button" class="btn btn-primary">返回</a>
                         					</div>                        					
                         				</div>
                         			</div>
                         			
                         			<div class="panel panel-default">
                         				<div class="panel-heading">
-                        					<strong>Approve or Reject Request</strong>
+                        					<strong>继续或驳回任务</strong>
                         				</div>
                         				<div class="panel-body">
                         					<form autocomplete="off" action="#" th:action="@{/review/submit}" th:object="${requestApprovalForm}" method="post" role="form"
+                                                  enctype="multipart/form-data"
 												class="form">
                         						<fieldset>
                         							<div class="form-group">
-                        								<label class="control-label">Comment</label>
-                        								<textarea class="form-control" placeholder="Input comment" th:field="*{comment}"></textarea>
+                        								<label class="control-label">备注</label>
+                        								<textarea class="form-control" placeholder="添加备注" th:field="*{comment}"></textarea>
                         							</div>
                         							
                         							<input type="hidden" th:value="${taskId}" th:field="*{taskId}"/>
                         							<input type="hidden" th:value="${leaveRequest.id}" th:field="*{leaveId}"/>
+
+                                                    <div th:class="form-group">
+                                                        <label class="control-label" sec:authorize="hasAuthority('COST_CONTROL_DPMT_EMPLOYEE')">上传清单编制文件</label>
+                                                        <label class="control-label" sec:authorize="hasAuthority('ENQUIRY_DPTM_EMPLOYEE')">上传招标文件</label>
+                                                        <label class="control-label" sec:authorize="hasAuthority('CONSTRUCT_DPTM_EMPLOYE')">上传施工完成现场图片</label>
+                                                        <input type="file" class="form-control" id="file1" th:field="*{file1}" placeholder="上传文件"/>
+                                                    </div>
                         							
-                        							<button type="submit" name="action" value="approve" class="btn btn-primary"><span>Approve</span></button>
-													<button type="submit" name="action" value="reject" class="btn btn-primary"><span>Reject</span></button>
+                        							<button type="submit" name="action" value="approve" class="btn btn-primary"><span>继续</span></button>
+													<button type="submit" name="action" value="reject" class="btn btn-primary"><span>驳回</span></button>
                         						</fieldset>
                         					</form>
                         				</div>

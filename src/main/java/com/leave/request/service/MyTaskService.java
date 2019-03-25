@@ -19,5 +19,7 @@ public interface MyTaskService {
 	MyTask findTaskByTaskId(String taskId);
 	
 	List<MyHistoryTask> getTaskHistory(String leaveId);
+
+	List<MyHistoryTask> getHistoricTasks(String userId);
 	
 }

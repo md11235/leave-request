@@ -18,12 +18,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.leave.request.constants.ApprovementStageEnum;
 import com.leave.request.constants.RequestStatusEnum;
+import com.leave.request.constants.UserRoleEnum;
 import com.leave.request.dto.MyHistoryTask;
 import com.leave.request.dto.MyTask;
 import com.leave.request.dto.RequestApprovalDto;
-import com.leave.request.model.LeaveRequest;
-import com.leave.request.model.RequestType;
+import com.leave.request.model.ConstructionFlowRequest;
 import com.leave.request.service.MyTaskService;
 import com.leave.request.service.RequestService;
 import com.leave.request.util.SecurityUtil;
@@ -52,12 +53,12 @@ public class RequestController {
 
 	@GetMapping("/request")
 	public String request(Model model) {
-		model.addAttribute("requestForm", new LeaveRequest());
+		model.addAttribute("requestForm", new ConstructionFlowRequest());
 		return "request";
 	}
 
 	@PostMapping("/request")
-	public String processRequest(@ModelAttribute("requestForm") LeaveRequest leaveRequest,
+	public String processRequest(@ModelAttribute("requestForm") ConstructionFlowRequest leaveRequest,
 								 HttpServletRequest request,
 								 @RequestParam("file1") MultipartFile file1,
 								 BindingResult bindingResult,
@@ -82,7 +83,7 @@ public class RequestController {
 
 	@GetMapping("/view/{id}")
 	public String requestView(@PathVariable("id") Long id, Model model) {
-		LeaveRequest leaveRequest = requestService.findById(id);
+		ConstructionFlowRequest leaveRequest = requestService.findById(id);
 
 		model.addAttribute("leaveRequest", leaveRequest);
 		
@@ -91,7 +92,7 @@ public class RequestController {
 	
 	@GetMapping("/edit/{id}")
 	public String requestEdit(@PathVariable("id") Long id, Model model, RedirectAttributes redirectAttributes) {
-		LeaveRequest leaveRequest = requestService.findById(id);
+		ConstructionFlowRequest leaveRequest = requestService.findById(id);
 		
 		if (!leaveRequest.getStatus().equals(RequestStatusEnum.REJECTED.getValue())) {
 			redirectAttributes.addFlashAttribute("error", "You are not authorized to view that page!");
@@ -103,8 +104,8 @@ public class RequestController {
 	}
 	
 	@PostMapping("/edit")
-	public String processRequestEdit(@ModelAttribute("requestForm") LeaveRequest leaveRequest, BindingResult bindingResult,
-			Model model) {
+	public String processRequestEdit(@ModelAttribute("requestForm") ConstructionFlowRequest leaveRequest, BindingResult bindingResult,
+                                     Model model) {
 		validator.validate(leaveRequest, bindingResult);
 
 		if (bindingResult.hasErrors()) {
@@ -125,12 +126,18 @@ public class RequestController {
 		return new ResponseEntity<List<MyHistoryTask>>(myHistoryTask, HttpStatus.OK);
 	}
 
+	@GetMapping("/json/get-historic-tasks")
+    public ResponseEntity<List<MyHistoryTask>> getHistoricTasks(Model model) {
+        List<MyHistoryTask> historicTasks = myTaskService.getHistoricTasks(SecurityUtil.getUsername());
+        return new ResponseEntity<List<MyHistoryTask>>(historicTasks, HttpStatus.OK);
+    }
+
 	@GetMapping("/review/{id}")
 	public String manageEmployeeLeavesReview(@PathVariable("id") String taskId, RedirectAttributes redirectAttributes,
 			Model model) {
 		MyTask myTask = myTaskService.findTaskByTaskId(taskId);
 
-		LeaveRequest leaveRequest = requestService.findById((Long) myTask.getProcessVariables().get("leaveId"));
+		ConstructionFlowRequest leaveRequest = requestService.findById((Long) myTask.getProcessVariables().get("leaveId"));
 
 		List<Attachment> attachments = requestService.findAllAttachmentsByLeaveId(Long.valueOf(leaveRequest.getId()));
 
@@ -143,28 +150,54 @@ public class RequestController {
 		model.addAttribute("taskId", myTask.getId());
 		RequestApprovalDto dto = new RequestApprovalDto(taskId, String.valueOf(leaveRequest.getId()));
 		model.addAttribute("requestApprovalForm", dto);
-		model.addAttribute("attachment", attachments.get(0));
+		model.addAttribute("attachments", attachments);
 
 		return "request-review";
 	}
 
 	@PostMapping(value = "/review/submit", params = "action=approve")
 	public String processApproveRequest(@ModelAttribute("requestApprovalForm") RequestApprovalDto requestApprovalDto,
-			BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes) {		
-		requestApprovalDto.setIsApproved(true);
-		requestService.approveOrReject(requestApprovalDto);
-		redirectAttributes.addFlashAttribute("requestReviewed", "Done! Request has been approved.");
+			@RequestParam("file1") MultipartFile file1,
+			BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes) {
+
+	    if(SecurityUtil.hasRole(UserRoleEnum.COST_CONTROL_DPMT_EMPLOYEE.getValue())) {
+            requestApprovalDto.setIsApproved(ApprovementStageEnum.COST_CONTROL_APPROVED.getValue());
+        }
+
+        if(SecurityUtil.hasRole(UserRoleEnum.ENQUIRY_DPTM_EMPLOYEE.getValue())) {
+            requestApprovalDto.setIsApproved(ApprovementStageEnum.ENQUIRY_APPROVED.getValue());
+        }
+
+        if(SecurityUtil.hasRole(UserRoleEnum.CONSTRUCT_DPTM_EMPLOYEE.getValue())) {
+            requestApprovalDto.setIsApproved(ApprovementStageEnum.CONSTRUCTION_DONE.getValue());
+        }
+
+		requestService.approveOrReject(requestApprovalDto, file1);
+
+		redirectAttributes.addFlashAttribute("requestReviewed", "您已经处理了本任务！");
 		
 		return "redirect:/home";
 	}
 	
 	@PostMapping(value = "/review/submit", params = "action=reject")
 	public String processRejectRequest(@ModelAttribute("requestApprovalForm") RequestApprovalDto requestApprovalDto,
+			@RequestParam("file1") MultipartFile file1,
 			BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes) {
 
-		requestApprovalDto.setIsApproved(false);
-		requestService.approveOrReject(requestApprovalDto);
-		redirectAttributes.addFlashAttribute("requestReviewed", "Done! Request has been rejected.");
+        if(SecurityUtil.hasRole(UserRoleEnum.COST_CONTROL_DPMT_EMPLOYEE.getValue())) {
+            requestApprovalDto.setIsApproved(ApprovementStageEnum.COST_CONTROL_REJECTED.getValue());
+        }
+
+        if(SecurityUtil.hasRole(UserRoleEnum.ENQUIRY_DPTM_EMPLOYEE.getValue())) {
+            requestApprovalDto.setIsApproved(ApprovementStageEnum.ENQUIRY_REJECTED.getValue());
+        }
+
+        if(SecurityUtil.hasRole(UserRoleEnum.CONSTRUCT_DPTM_EMPLOYEE.getValue())) {
+            requestApprovalDto.setIsApproved(ApprovementStageEnum.CONSTRUCTION_REJECTED.getValue());
+        }
+
+		requestService.approveOrReject(requestApprovalDto, file1);
+		redirectAttributes.addFlashAttribute("requestReviewed", "您已经驳回了本任务！");
 		
 		return "redirect:/home";
 	}

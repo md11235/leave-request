@@ -10,7 +10,7 @@ import org.flowable.engine.task.Attachment;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.leave.request.dto.RequestApprovalDto;
-import com.leave.request.model.LeaveRequest;
+import com.leave.request.model.ConstructionFlowRequest;
 
 /**
  * @author Eraine
@@ -18,17 +18,17 @@ import com.leave.request.model.LeaveRequest;
  */
 public interface RequestService {
 
-	LeaveRequest findById(Long id);
+	ConstructionFlowRequest findById(Long id);
 	
-	List<LeaveRequest> findAllByUsername(String username);
+	List<ConstructionFlowRequest> findAllByUsername(String username);
 	
-	void save(LeaveRequest leaveRequest);
+	void save(ConstructionFlowRequest leaveRequest);
 	
-	void submit(LeaveRequest leaveRequest, MultipartFile file);
+	void submit(ConstructionFlowRequest leaveRequest, MultipartFile file);
 
 	void sendAlert(DelegateExecution execution);
 	
-	void approveOrReject(RequestApprovalDto requestApprovalDto);
+	void approveOrReject(RequestApprovalDto requestApprovalDto, MultipartFile file);
 
 	List<Attachment> findAllAttachmentsByLeaveId(Long LeaveId);
 	

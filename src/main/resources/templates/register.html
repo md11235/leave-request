@@ -10,7 +10,7 @@
 	            <div class="col-md-4 col-md-offset-4">
 	                <div class="login-panel panel panel-default">
 	                    <div class="panel-heading">
-	                        <h3 class="panel-title">Register</h3>
+	                        <h3 class="panel-title">注册</h3>
 	                    </div>
 	                    <div class="panel-body">
 	                        <form autocomplete="off" action="#" th:action="@{/register}" th:object="${userForm}" method="post" role="form"
@@ -24,11 +24,11 @@
 	                            <fieldset>
 	                                <div th:class="${#fields.hasErrors('username') ? 'form-group  has-error' : 'form-group'}">
 	                                	<label class="control-label" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></label>
-	                                    <input id="username" th:field="*{username}" class="form-control" placeholder="Username" name="username" type="text" autofocus="true"/>
+	                                    <input id="username" th:field="*{username}" class="form-control" placeholder="用户名" name="username" type="text" autofocus="true"/>
 	                                </div>
 	                                <div th:class="${#fields.hasErrors('password') ? 'form-group  has-error' : 'form-group'}">
 	                                	<label class="control-label" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></label>
-	                                    <input id="password" th:field="*{password}" class="form-control" placeholder="Password" name="password" type="password" />
+	                                    <input id="password" th:field="*{password}" class="form-control" placeholder="密码" name="password" type="password" />
 	                                </div>
 	                                
 	                                <div th:class="${#fields.hasErrors('roles') ? 'form group has-error' : 'form-group'}">
@@ -36,11 +36,11 @@
 	                                	<select id="select-roles" name="select-roles" class="form-control" th:field="*{roles}"></select>
 	                                </div>
 	                                
-	                                <input type="submit" class="btn btn-lg btn-primary btn-block" value="Register"/>
+	                                <input type="submit" class="btn btn-lg btn-primary btn-block" value="注册账号"/>
 	                            </fieldset>
 	                        </form>
 	                        <hr/>
-							<p><a th:href="@{/login}">Go back to Login page?</a></p>
+							<p><a th:href="@{/login}">我要登陆系统</a></p>
 	                    </div>
 	                </div>
 	            </div>

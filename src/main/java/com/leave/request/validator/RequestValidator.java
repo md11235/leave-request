@@ -9,7 +9,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
-import com.leave.request.model.LeaveRequest;
+import com.leave.request.model.ConstructionFlowRequest;
 
 /**
  * @author Eraine
@@ -20,17 +20,17 @@ public class RequestValidator implements Validator {
 
 	@Override
 	public boolean supports(Class<?> clazz) {
-		return LeaveRequest.class.equals(clazz);
+		return ConstructionFlowRequest.class.equals(clazz);
 	}
 
 	@Override
 	public void validate(Object obj, Errors errors) {
-		LeaveRequest leaveRequest = (LeaveRequest) obj;
+		ConstructionFlowRequest leaveRequest = (ConstructionFlowRequest) obj;
 		
-		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "requestType", "message.notEmpty.requestType", "Request type must not be empty.");
-		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "startDate", "message.notEmpty.startDate", "Start Date must not be empty.");
-		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "endDate", "message.notEmpty.endDate", "End Date must not be empty.");
-		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "reason", "message.notEmpty.reason", "Reason must not be empty.");
+		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "requestType", "message.notEmpty.requestType", "请选择流程类型。");
+		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "startDate", "message.notEmpty.startDate", "请输入开始日期");
+		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "endDate", "message.notEmpty.endDate", "请输入结束日期");
+		// ValidationUtils.rejectIfEmptyOrWhitespace(errors, "reason", "message.notEmpty.reason", "请输入备注信息");
 		
 	}
 

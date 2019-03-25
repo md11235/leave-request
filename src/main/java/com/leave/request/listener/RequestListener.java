@@ -13,13 +13,17 @@ import org.flowable.task.service.delegate.DelegateTask;
  */
 public interface RequestListener {
 
-	void onCreateTeamLeadReview(Execution execution, DelegateTask task);
+	void onCreateCostControlReview(Execution execution, DelegateTask task);
+
+	void onCompleteCostControlReview(DelegateTask task);
 	
-	void onCompleteTeamLeadReview(DelegateTask task);
+	void onCreateEnquiryReview(Execution execution, DelegateTask task);
 	
-	void onCreateManagerReview(Execution execution, DelegateTask task);
-	
-	void onCompleteManagerReview(DelegateTask task);
+	void onCompleteEnquiryReview(DelegateTask task);
+
+	void onCreateConstructionReview(Execution execution, DelegateTask task);
+
+	void onCompleteConstructionReview(DelegateTask task);
 	
 	void onApprove(DelegateExecution execution);
 	

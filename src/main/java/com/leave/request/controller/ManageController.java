@@ -40,10 +40,10 @@ public class ManageController {
 	
 	@GetMapping("/manage")
 	public String manageEmployeeLeaves(RedirectAttributes redirectAttributes, Model model) {
-		if (SecurityUtil.hasRole(UserRoleEnum.EMPLOYEE.getValue())) {
-			redirectAttributes.addFlashAttribute("error", "You are not authorized to view that page!");
-			return "redirect:/home";
-		}
+//		if (SecurityUtil.hasRole(UserRoleEnum.EMPLOYEE.getValue())) {
+//			redirectAttributes.addFlashAttribute("error", "You are not authorized to view that page!");
+//			return "redirect:/home";
+//		}
 		
 		return "manage";
 	}

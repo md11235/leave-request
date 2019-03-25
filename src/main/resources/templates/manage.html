@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" 
 		xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-	<title>Mawsi HR</title>
+	<title>计划管理</title>
 	
 	<head th:replace="fragments/header :: header"></head>
 	
@@ -17,7 +17,7 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-lg-12">
-                        <h1 class="page-header">Manage Employee Leaves</h1>
+                        <h1 class="page-header">处理流程任务</h1>
                         
                         <table id="employeeLeaves"></table>
                         
@@ -45,38 +45,38 @@
 			sortOrder: 'desc',
 			columns: [{
 				field: 'processVariables.leaveId',
-				title: 'Leave ID',
+				title: '流程编号',
 				sortable: true
 			},{
 				field: 'createTime',
-				title: 'Date Submitted',
+				title: '发起日期',
 				sortable: true,
 				formatter: function(value, row, index) {
 					return value == undefined ? '-' : moment(value).format("MM/DD/YYYY");  
 				}
 			}, {
 				field: 'processVariables.employeeUsername',
-				title: "Requested By",
+				title: "发起人",
 				sortable: true
 			}, {
 				field: 'processVariables.startDate',
-				title: 'Start Date',
+				title: '工期开始日期',
 				sortable: true,
 				formatter: function(value, row, index) {
 					return value == undefined ? '-' : moment(value).format("MM/DD/YYYY");  
 				}
 			}, {
 				field: 'processVariables.endDate',
-				title: 'End Date',
+				title: '工期结束日期',
 				sortable: true,
 				formatter: function(value, row, index) {
 					return value == undefined ? '-' : moment(value).format("MM/DD/YYYY");
 				}
 			}, {
 				field: 'operate',
-				title: 'Actions',
+				title: '操作',
 				formatter: function(value, row, index) {
-					return '<a href="/review/' + row.id + '">View Details</a>';
+					return '<a href="/review/' + row.id + '">查看详情</a>';
 				}
 			}]
 		});

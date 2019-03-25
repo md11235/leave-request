@@ -8,7 +8,5 @@ package com.leave.request.constants;
  *
  */
 public enum RequestTypeEnum {
-
-	VACATION_LEAVE, SICK_LEAVE, EMERGENCY_LEAVE;
-	
+    MUNICIPAL_LANDSCAPE_CONSTRUCTION // 市政景观施工
 }

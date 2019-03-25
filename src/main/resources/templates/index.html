@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" 
 		xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-	<title>Mawsi HR</title>
+	<title>计划管理</title>
 	
 	<head th:replace="fragments/header :: header"></head>
 	
@@ -17,12 +17,11 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-lg-12">
-                        <h1 class="page-header">Hello again, <span th:text="${user}"></span>!</h1>
+                        <h1 class="page-header"><span th:text="${user}"></span>，欢迎使用保利贵州计划管理系统！</h1>
                         
 						<div th:if="${count > 0}" class="alert alert-info alert-dismissable fade in">
 							<button type="button" class="close fa-times fa" data-dismiss="alert" aria-label="close"></button>
-                     		There are currently <strong><span th:text="${count}"></span> requests</strong> assigned to you or your group. 
-                     		You can view them by clicking "Manage Employee Leaves".
+                            贵部门当前有<strong><span th:text="${count}"></span></strong>个任务。您可以通过左侧的“完成流程任务”来查看。
                  		</div>
                         
 						<div th:if="!${#strings.isEmpty(error)}" class="alert alert-danger alert-dismissable fade in">
@@ -34,8 +33,16 @@
 							<button type="button" class="close fa-times fa" data-dismiss="alert" aria-label="close"></button>
                      		<span th:text="${requestReviewed}"></span>
                  		</div>                        
-                        
-                        <table id="myLeaves"></table>
+
+                        <div sec:authorize="hasAuthority('DESIGN_DPMT_EMPLOYEE')">
+                            <label>我发起的流程列表</label>
+                            <table id="myLeaves"></table>
+                        </div>
+
+                        <div sec:authorize="hasAuthority('COST_CONTROL_DPMT_EMPLOYEE') or hasAuthority('ENQUIRY_DPTM_EMPLOYEE') or hasAuthority('CONSTRUCT_DPTM_EMPLOYEE')">
+                            <label>我经办的任务列表</label>
+                            <table id="myTasks" sec:authorize="hasAuthority('COST_CONTROL_DPMT_EMPLOYEE') or hasAuthority('ENQUIRY_DPTM_EMPLOYEE') or hasAuthority('CONSTRUCT_DPTM_EMPLOYEE')"></table>
+                        </div>
                     </div>
                     <!-- /.col-lg-12 -->
                 </div>
@@ -59,45 +66,77 @@
 			sortName: 'createDate',
 			sortOrder: 'desc',
 			formatNoMatches: function () {
-		        return 'You have not filed any leave requests for now.';
+		        return '您没有发起过流程。'; // You have not filed any leave requests for now.
 		    },
 			columns: [{
 				field: 'id',
-				title: 'Leave ID',
+				title: '流程编号',
 				sortable: true
 			}, {
 				field: 'createDate',
-				title: 'Date Submitted',
+				title: '流程启动日期',
 				sortable: true,
 				formatter: function(value, row, index) {
 					return value == undefined ? '-' : moment(value).format("MM/DD/YYYY");
 				}
 			}, {
 				field: 'requestType.name',
-				title: 'Request Type',
+				title: '流程类型',
 				sortable: true
 			}, {
 				field: 'status',
-				title: 'Status',
+				title: '流程状态',
 				sortable: true
 			}, {
 				field: 'operate',
-				title: 'Actions',
+				title: '操作',
 				formatter: actionFormatter
 			}]
 		});
 		
 		function actionFormatter(value, row, index) {
-			var link = '<a href="/view/' + row.id + '">View</a>';
+			var link = '<a href="/view/' + row.id + '">查看</a>';
 			
 			if (row.status !== undefined && row.status !== null && row.status !== '') {
 				if (row.status === 'Rejected') {
-					link += ' | <a href="/edit/' + row.id + '">Edit</a>';
+					link += ' | <a href="/edit/' + row.id + '">编辑</a>';
 				}
 			}
 		
 			return link;
 		}
+
+        $('#myTasks').bootstrapTable({
+            url: '/json/get-historic-tasks',
+            pagination: true,
+            pageSize: 10,
+            pageList: [10, 25, 50, 100],
+            sortName: 'dateCompleted',
+            sortOrder: 'desc',
+            formatNoMatches: function () {
+                return '您没有做过任务。';
+            },
+            columns: [{
+                field: 'name',
+                title: '任务名字',
+                sortable: true
+            }, {
+                field: 'dateCompleted',
+                title: '任务完成日期',
+                sortable: true,
+                formatter: function(value, row, index) {
+                    return value == undefined ? '-' : moment(value).format("MM/DD/YYYY");
+                }
+            }, {
+                field: 'assignee',
+                title: '经办人',
+                sortable: true
+            }, {
+                field: 'operate',
+                title: '操作',
+                formatter: actionFormatter
+            }]
+        });
 		
 	</script>
 	</body>

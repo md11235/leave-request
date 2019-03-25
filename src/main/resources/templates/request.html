@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" 
 		xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-	<title>Mawsi HR</title>
+	<title>计划管理</title>
 	
 	<head th:replace="fragments/header :: header"></head>
 	
@@ -17,7 +17,7 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-lg-12">
-                        <h1 class="page-header">Request Leave</h1>
+                        <h1 class="page-header">发起流程</h1>
                     </div>
                     <!-- /.col-lg-12 -->
                 </div>
@@ -34,42 +34,43 @@
 										class="form">	
 										<div th:if="${success}" class="alert alert-success alert-dismissable fade in">
                                 			<button type="button" class="close fa-times fa" data-dismiss="alert" aria-label="close"></button>
-                                			<span>Leave request has been submitted! You can view your pending requests <strong><a th:href="@{/}">here</a></strong>.</span>
+                                			<span>您已经成功发起市政景观工程流程。 <strong><a th:href="@{/}">查看已经发起的流程</a></strong>.</span>
                             			</div>
                             			
 	                        			<fieldset>
 	                        				<div th:class="${#fields.hasErrors('requestType') ? 'form-group  has-error' : 'form-group'}">
-	                        					<label class="control-label">Request Type</label>
+	                        					<label class="control-label">流程类型</label>
 	                        					<label class="control-label" th:if="${#fields.hasErrors('requestType')}" th:errors="*{requestType}"></label>	
 	                        					<select id="request-types" name="select-roles" class="form-control" th:field="*{requestType}"></select>
 	                        				</div>
 	                        				<div th:class="${#fields.hasErrors('startDate') ? 'form-group  has-error' : 'form-group'}">
 												<label class="control-label" th:if="${#fields.hasErrors('startDate')}" th:errors="*{startDate}"></label>
 		                        				<div class="input-group date">
-	  												<input type="text" class="form-control" id="startDate" th:field="*{startDate}" placeholder="Input start date"/>
+	  												<input type="text" class="form-control" id="startDate" th:field="*{startDate}" placeholder="输入工期计划开始日期"/>
 	  												<span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
 												</div>
 											</div>
 											<div th:class="${#fields.hasErrors('endDate') ? 'form-group  has-error' : 'form-group'}">
 												<label class="control-label" th:if="${#fields.hasErrors('endDate')}" th:errors="*{endDate}"></label>
 		                        				<div class="input-group date">
-	  												<input type="text" class="form-control" id="endDate" th:field="*{endDate}" placeholder="Input end date"/>
+	  												<input type="text" class="form-control" id="endDate" th:field="*{endDate}" placeholder="输入工期计划结束日期"/>
 	  												<span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
 												</div>
 											</div>
 											<div th:class="${#fields.hasErrors('reason') ? 'form-group  has-error' : 'form-group'}">
 												<label class="control-label" th:if="${#fields.hasErrors('reason')}" th:errors="*{reason}"></label>
-												<textarea class="form-control" th:field="*{reason}" placeholder="Input reason"></textarea>
+												<textarea class="form-control" th:field="*{reason}" placeholder="备注"></textarea>
 											</div>
 
 
 											<div th:class="${#fields.hasErrors('file1') ? 'form-group  has-error' : 'form-group'}">
+                                                <label class="control-label">上传施工设计图</label>
 												<label class="control-label" th:if="${#fields.hasErrors('file1')}" th:errors="*{file1}"></label>
 												<input type="file" class="form-control" id="file1" th:field="*{file1}" placeholder="上传文件"/>
 											</div>
 
 
-											<input type="submit" class="btn btn-lg btn-primary btn-block" value="Submit"/>
+											<input type="submit" class="btn btn-lg btn-primary btn-block" value="启动流程"/>
 	                        			</fieldset>
 	                        		</form>
                         		</div>
@@ -104,7 +105,7 @@
 	
 	        var options = {
 	            data: data,
-	            placeholder: "Select request type"
+	            placeholder: "选择流程类型"
 	        };
 			
 			$('#request-types').select2(options);
