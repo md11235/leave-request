@@ -15,8 +15,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -60,7 +62,8 @@ public class LeaveRequest extends BaseModel {
 	@Column(name = "approved_by")
 	private String approvedBy;
 
-	private String file1;
+	@Transient
+	private MultipartFile file1;
 
 	public LeaveRequest() {
 	}
@@ -198,11 +201,11 @@ public class LeaveRequest extends BaseModel {
 	}
 
 
-	public String getFile1() {
+	public MultipartFile getFile1() {
 		return file1;
 	}
 
-	public void setFile1(String file1) {
+	public void setFile1(MultipartFile file1) {
 		this.file1 = file1;
 	}
 }

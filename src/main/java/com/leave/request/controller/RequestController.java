@@ -5,6 +5,7 @@ package com.leave.request.controller;
 
 import java.util.List;
 
+import org.flowable.engine.task.Attachment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,8 @@ import com.leave.request.service.MyTaskService;
 import com.leave.request.service.RequestService;
 import com.leave.request.util.SecurityUtil;
 import com.leave.request.validator.RequestValidator;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Eraine
@@ -55,10 +58,14 @@ public class RequestController {
 
 	@PostMapping("/request")
 	public String processRequest(@ModelAttribute("requestForm") LeaveRequest leaveRequest,
+								 HttpServletRequest request,
 								 @RequestParam("file1") MultipartFile file1,
 								 BindingResult bindingResult,
 			Model model) {
 		validator.validate(leaveRequest, bindingResult);
+
+		String encoding = request.getCharacterEncoding();
+		System.out.println(encoding);
 
 		if (bindingResult.hasErrors()) {
 			return "request";
@@ -66,7 +73,7 @@ public class RequestController {
 
 
 		requestService.save(leaveRequest);
-		requestService.submit(leaveRequest);
+		requestService.submit(leaveRequest, file1);
 
 		model.addAttribute("success", true);
 
@@ -105,7 +112,7 @@ public class RequestController {
 		}
 
 		requestService.save(leaveRequest);
-		requestService.submit(leaveRequest);
+		requestService.submit(leaveRequest, null);
 
 		model.addAttribute("success", true);
 
@@ -125,6 +132,8 @@ public class RequestController {
 
 		LeaveRequest leaveRequest = requestService.findById((Long) myTask.getProcessVariables().get("leaveId"));
 
+		List<Attachment> attachments = requestService.findAllAttachmentsByLeaveId(Long.valueOf(leaveRequest.getId()));
+
 		if (SecurityUtil.getUsername().equals(leaveRequest.getCreateBy())) {
 			redirectAttributes.addFlashAttribute("error", "You are not authorized to view that page!");
 			return "redirect:/home";
@@ -134,6 +143,7 @@ public class RequestController {
 		model.addAttribute("taskId", myTask.getId());
 		RequestApprovalDto dto = new RequestApprovalDto(taskId, String.valueOf(leaveRequest.getId()));
 		model.addAttribute("requestApprovalForm", dto);
+		model.addAttribute("attachment", attachments.get(0));
 
 		return "request-review";
 	}

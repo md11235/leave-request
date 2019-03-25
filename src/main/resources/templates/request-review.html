@@ -63,6 +63,11 @@
                         									<td>Status</td>
                         									<td th:text="${leaveRequest.status}"></td>
                         								</tr>
+
+                                                        <tr>
+                                                            <td>Attachments</td>
+                                                            <td th:text="${attachment.name}"></td>
+                                                        </tr>
                         							</tbody>
                         						</table>
                         					<a th:href="@{/manage}" role="button" class="btn btn-primary">Back</a>                        						

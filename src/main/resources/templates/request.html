@@ -30,6 +30,7 @@
                         	<div class="panel-body">
                         		<div class="span5 col-md-6">
 	                        		<form autocomplete="off" action="#" th:action="@{/request}" th:object="${requestForm}" method="post" role="form"
+                                          enctype="multipart/form-data"
 										class="form">	
 										<div th:if="${success}" class="alert alert-success alert-dismissable fade in">
                                 			<button type="button" class="close fa-times fa" data-dismiss="alert" aria-label="close"></button>
@@ -63,7 +64,7 @@
 
 
 											<div th:class="${#fields.hasErrors('file1') ? 'form-group  has-error' : 'form-group'}">
-												<label class="control-label" th:if="${#fields.hasErrors('file1')}" th:errors="*{reason}"></label>
+												<label class="control-label" th:if="${#fields.hasErrors('file1')}" th:errors="*{file1}"></label>
 												<input type="file" class="form-control" id="file1" th:field="*{file1}" placeholder="上传文件"/>
 											</div>
 

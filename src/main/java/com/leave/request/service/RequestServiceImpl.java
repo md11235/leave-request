@@ -3,6 +3,7 @@
  */
 package com.leave.request.service;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,11 +15,13 @@ import org.flowable.engine.delegate.DelegateExecution;
 import org.flowable.engine.repository.Deployment;
 import org.flowable.engine.repository.ProcessDefinition;
 import org.flowable.engine.runtime.ProcessInstance;
+import org.flowable.engine.task.Attachment;
 import org.flowable.task.api.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.leave.request.dto.RequestApprovalDto;
 import com.leave.request.model.LeaveRequest;
@@ -56,8 +59,18 @@ public class RequestServiceImpl implements RequestService {
 		leaveRequestRepository.save(leaveRequest);
 	}
 
-	@Override
-	public void submit(LeaveRequest leaveRequest) {
+    @Override
+    public List<Attachment> findAllAttachmentsByLeaveId(Long leaveId) {
+        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
+                .processInstanceBusinessKey(String.valueOf(leaveId)).singleResult();
+
+        assert processInstance != null: "FATAL: no process instance for this LEAVE REQUEST: " + String.valueOf(leaveId);
+
+        return taskService.getProcessInstanceAttachments(processInstance.getId());
+    }
+
+    @Override
+	public void submit(LeaveRequest leaveRequest, MultipartFile file) {
 		Deployment deployment = repositoryService.createDeployment()
 				.addClasspathResource("processes/employee_leave_workflow.bpmn20.xml").deploy();
 		ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery()
@@ -90,7 +103,28 @@ public class RequestServiceImpl implements RequestService {
 				.singleResult();
 		taskService.setAssignee(task.getId(), SecurityUtil.getUsername());
 		taskService.setVariables(task.getId(), variables);
-		taskService.complete(task.getId());
+
+
+		if(file != null) {
+            try {
+                taskService.createAttachment(
+                        file.getContentType(),
+                        task.getId(),
+                        processInstance.getId(),
+                        file.getOriginalFilename(),
+                        file.getName(),
+                        file.getInputStream()
+                );
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        taskService.complete(task.getId());
+
+        for(Attachment attachment : taskService.getProcessInstanceAttachments(processInstance.getId())) {
+            System.out.println(attachment.getName());
+        }
 	}
 
 	@Override
