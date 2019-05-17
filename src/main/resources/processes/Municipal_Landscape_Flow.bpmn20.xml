@@ -15,9 +15,9 @@
     
     <subProcess id="costControlReviewSubProcess" name="Cost Control Department">
       <startEvent id="startevent2" name="Start"></startEvent>
-      
+
       <sequenceFlow id="flow3" sourceRef="startevent2" targetRef="costControlReviewTask"></sequenceFlow>
-      
+
       <userTask id="costControlReviewTask" name="Cost Control Review" flowable:candidateGroups="cost_control_dpmt_employee">
         <documentation>Cost Control Department Review</documentation>
         <extensionElements>
@@ -25,24 +25,24 @@
           <flowable:taskListener event="complete" expression="${requestListener.onCompleteCostControlReview(task)}"></flowable:taskListener>
         </extensionElements>
       </userTask>
-      
+
       <sequenceFlow id="flow4" sourceRef="costControlReviewTask" targetRef="exclusivegateway1"></sequenceFlow>
-      
+
       <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
-      
+
       <sequenceFlow id="flow5" sourceRef="exclusivegateway1" targetRef="endevent1">
         <conditionExpression xsi:type="tFormalExpression"><![CDATA[${isApproved > 0}]]></conditionExpression>
       </sequenceFlow>
-      
+
       <endEvent id="endevent1" name="End"></endEvent>
-      
+
       <sequenceFlow id="flow6" sourceRef="exclusivegateway1" targetRef="errorendevent1">
         <extensionElements>
           <flowable:executionListener event="end" expression="${requestListener.onReject(execution)}"></flowable:executionListener>
         </extensionElements>
         <conditionExpression xsi:type="tFormalExpression"><![CDATA[${isApproved < 0}]]></conditionExpression>
       </sequenceFlow>
-      
+
       <endEvent id="errorendevent1" name="ErrorEnd">
         <errorEventDefinition errorRef="rejected"></errorEventDefinition>
       </endEvent>
@@ -52,8 +52,43 @@
       <errorEventDefinition errorRef="rejected"></errorEventDefinition>
     </boundaryEvent>
     
-    <sequenceFlow id="flow8" sourceRef="costControlReviewSubProcess" targetRef="enquiryReviewSubProcess"></sequenceFlow>
+    <boundaryEvent id="esclationTimer" cancelActivity="false" attachedToRef="costControlReviewSubProcess">
+      <timerEventDefinition>
+        <timeDuration>PT10S</timeDuration>
+      </timerEventDefinition>
+    </boundaryEvent>
+
+    <sequenceFlow id="flow33" sourceRef="esclationTimer" targetRef="sendMail"></sequenceFlow>
+
+    <serviceTask id="sendMail" flowable:type="mail">
+      <extensionElements>
+        <flowable:field name="from" stringValue="zhangsen@point-circle.com" />
+        <flowable:field name="to" expression="zhangsen@point-circle.com" />
+        <flowable:field name="subject" expression="Task expiring soon." />
+        <flowable:field name="html">
+          <flowable:expression>
+            <![CDATA[
+                     <html>
+                     <body>
+                     Hello Zhang,<br/><br/>
+                     Your order has been <b>processed and shipped</b>.<br/><br/>
+                     Kind regards,<br/>
+                     TheCompany.
+                     </body>
+                     </html>
+            ]]>
+          </flowable:expression>
+        </flowable:field>
+      </extensionElements>
+    </serviceTask>
     
+    <sequenceFlow id="flow34" sourceRef="sendMail" targetRef="join"></sequenceFlow>
+    <sequenceFlow id="flow35" sourceRef="costControlReviewSubProcess" targetRef="join"></sequenceFlow>
+
+    <parallelGateway id="join"></parallelGateway>
+
+    <sequenceFlow id="flow8" sourceRef="join" targetRef="enquiryReviewSubProcess"></sequenceFlow> <!-- costControlReviewSubProcess -->
+
     <subProcess id="enquiryReviewSubProcess" name="Enquiry Department">
       <startEvent id="startevent3" name="Start"></startEvent>
       <userTask id="enquiryDepartmentReviewTask" name="Enquiry Review" flowable:candidateGroups="enquiry_dptm_employee">
@@ -82,7 +117,7 @@
         <conditionExpression xsi:type="tFormalExpression"><![CDATA[${isApproved < 0}]]></conditionExpression>
       </sequenceFlow>
     </subProcess>
-    
+
     <boundaryEvent id="boundaryerror2" name="Error" attachedToRef="enquiryReviewSubProcess">
       <errorEventDefinition errorRef="rejected"></errorEventDefinition>
     </boundaryEvent>
@@ -115,19 +150,19 @@
         <conditionExpression xsi:type="tFormalExpression"><![CDATA[${!isApproved < 0}]]></conditionExpression>
       </sequenceFlow>
     </subProcess>
-    
+
     <boundaryEvent id="boundaryError3" name="Error" attachedToRef="constructionCompanyReviewSubProcess">
       <errorEventDefinition errorRef="rejected"></errorEventDefinition>
     </boundaryEvent>
-    
+
     <sequenceFlow id="flow14" sourceRef="enquiryReviewSubProcess" targetRef="constructionCompanyReviewSubProcess"></sequenceFlow>
     <sequenceFlow id="flow7" sourceRef="boundaryerror1" targetRef="submitRequestTask"></sequenceFlow>
     <sequenceFlow id="flow13" sourceRef="boundaryerror2" targetRef="costControlReviewSubProcess"></sequenceFlow>
     <sequenceFlow id="flow19" sourceRef="boundaryError3" targetRef="enquiryReviewSubProcess"></sequenceFlow>
     <sequenceFlow id="flow20" sourceRef="constructionCompanyReviewSubProcess" targetRef="endevent4"></sequenceFlow>
-
-    <endEvent id="endevent4" name="End"></endEvent>
     
+    <endEvent id="endevent4" name="End"></endEvent>
+
   </process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_municipalLandscapeFlow">
     <bpmndi:BPMNPlane bpmnElement="municipalLandscapeFlow" id="BPMNPlane_municipalLandscapeFlow">
@@ -159,25 +194,25 @@
         <omgdc:Bounds height="30.0" width="30.0" x="464.18330634959" y="221.3463335001194"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="enquiryReviewSubProcess" id="BPMNShape_enquiryReviewSubProcess">
-        <omgdc:Bounds height="181.0" width="351.0" x="649.9999741713216" y="66.66666401757145"></omgdc:Bounds>
+        <omgdc:Bounds height="181.0" width="351.0" x="779.666681898964" y="66.66666401757145"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="startevent3" id="BPMNShape_startevent3">
-        <omgdc:Bounds height="29.999999999999986" width="30.0" x="659.9999741713216" y="141.66666401757146"></omgdc:Bounds>
+        <omgdc:Bounds height="29.999999999999986" width="30.0" x="789.666681898964" y="141.66666401757146"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="enquiryDepartmentReviewTask" id="BPMNShape_enquiryDepartmentReviewTask">
-        <omgdc:Bounds height="54.999999999999986" width="105.0" x="719.9999741713216" y="131.66666401757146"></omgdc:Bounds>
+        <omgdc:Bounds height="54.999999999999986" width="105.0" x="849.666681898964" y="131.66666401757146"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="exclusivegateway2" id="BPMNShape_exclusivegateway2">
-        <omgdc:Bounds height="39.999999999999986" width="40.0" x="840.0" y="135.0"></omgdc:Bounds>
+        <omgdc:Bounds height="39.999999999999986" width="40.0" x="969.6667077276425" y="135.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="errorendevent2" id="BPMNShape_errorendevent2">
-        <omgdc:Bounds height="27.999999999999986" width="28.0" x="929.9999741713216" y="185.66666401757146"></omgdc:Bounds>
+        <omgdc:Bounds height="27.999999999999986" width="28.0" x="1059.666681898964" y="185.66666401757146"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="endevent2" id="BPMNShape_endevent2">
-        <omgdc:Bounds height="28.0" width="28.0" x="929.9999741713216" y="97.66666401757145"></omgdc:Bounds>
+        <omgdc:Bounds height="28.0" width="28.0" x="1059.666681898964" y="97.66666401757145"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="boundaryerror2" id="BPMNShape_boundaryerror2">
-        <omgdc:Bounds height="30.0" width="30.0" x="916.5509164563679" y="232.99498300811354"></omgdc:Bounds>
+        <omgdc:Bounds height="30.0" width="30.0" x="1046.2176241840107" y="232.99498300811354"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="endevent4" id="BPMNShape_endevent4">
         <omgdc:Bounds height="28.0" width="28.0" x="1683.3332664436791" y="170.99999801317858"></omgdc:Bounds>
@@ -203,6 +238,15 @@
       <bpmndi:BPMNShape bpmnElement="boundaryError3" id="BPMNShape_boundaryError3">
         <omgdc:Bounds height="30.0" width="30.0" x="1451.5509422850464" y="241.32831899054207"></omgdc:Bounds>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="esclationTimer" id="BPMNShape_esclationTimer">
+        <omgdc:Bounds height="31.0" width="31.0" x="318.2899144591987" y="220.7806180746408"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="join" id="BPMNShape_join">
+        <omgdc:Bounds height="40.0" width="40.0" x="694.0" y="139.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sendMail" id="BPMNShape_sendMail">
+        <omgdc:Bounds height="80.0" width="100.0" x="429.0" y="334.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge bpmnElement="flow17" id="BPMNEdge_flow17">
         <omgdi:waypoint x="1407.695945945946" y="149.7027027027027"></omgdi:waypoint>
         <omgdi:waypoint x="1410.0" y="135.0"></omgdi:waypoint>
@@ -216,16 +260,16 @@
       <bpmndi:BPMNEdge bpmnElement="flow19" id="BPMNEdge_flow19">
         <omgdi:waypoint x="1451.827099053146" y="259.19846013447915"></omgdi:waypoint>
         <omgdi:waypoint x="1095.5555710615934" y="328.8888792108608"></omgdi:waypoint>
-        <omgdi:waypoint x="967.7308502752298" y="247.61666401757145"></omgdi:waypoint>
+        <omgdi:waypoint x="1029.112705775181" y="247.61666401757145"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow13" id="BPMNEdge_flow13">
-        <omgdi:waypoint x="917.4349462785465" y="253.06349776530712"></omgdi:waypoint>
+        <omgdi:waypoint x="1046.6313071654042" y="251.49647781875674"></omgdi:waypoint>
         <omgdi:waypoint x="669.9999620737855" y="342.22219874240744"></omgdi:waypoint>
         <omgdi:waypoint x="548.4617497643261" y="235.94999801317857"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow14" id="BPMNEdge_flow14">
-        <omgdi:waypoint x="1000.9499741713207" y="159.89953079800276"></omgdi:waypoint>
-        <omgdi:waypoint x="1185.0" y="162.76635440315934"></omgdi:waypoint>
+        <omgdi:waypoint x="1130.6166818989636" y="160.77377878663825"></omgdi:waypoint>
+        <omgdi:waypoint x="1184.9999999999998" y="161.8918572700415"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow15" id="BPMNEdge_flow15">
         <omgdi:waypoint x="1224.944994780224" y="165.38321009235764"></omgdi:waypoint>
@@ -234,6 +278,10 @@
       <bpmndi:BPMNEdge bpmnElement="flow16" id="BPMNEdge_flow16">
         <omgdi:waypoint x="1359.9499999999998" y="167.23076923076923"></omgdi:waypoint>
         <omgdi:waypoint x="1385.1020408163256" y="167.1017857142857"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow34" id="BPMNEdge_sid-flow34">
+        <omgdi:waypoint x="522.6662790697674" y="334.0"></omgdi:waypoint>
+        <omgdi:waypoint x="703.5555555555555" y="168.53166666666667"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1">
         <omgdi:waypoint x="69.94588261427621" y="155.34758262028765"></omgdi:waypoint>
@@ -253,6 +301,10 @@
         <omgdi:waypoint x="441.61665607028414" y="144.25581196666695"></omgdi:waypoint>
         <omgdi:waypoint x="476.75924866287835" y="144.0923591242897"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow35" id="BPMNEdge_flow35">
+        <omgdi:waypoint x="617.6166560702857" y="153.3269148954344"></omgdi:waypoint>
+        <omgdi:waypoint x="695.0704156951957" y="157.88824542299827"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow5" id="BPMNEdge_flow5">
         <omgdi:waypoint x="498.7233630916401" y="126.06185968872177"></omgdi:waypoint>
         <omgdi:waypoint x="500.0" y="115.0"></omgdi:waypoint>
@@ -268,33 +320,35 @@
         <omgdi:waypoint x="1683.3537671682561" y="184.19083921115867"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow10" id="BPMNEdge_flow10">
-        <omgdi:waypoint x="824.9499741713212" y="156.66666634499015"></omgdi:waypoint>
-        <omgdi:waypoint x="840.9090901012263" y="155.9068173759735"></omgdi:waypoint>
+        <omgdi:waypoint x="954.6166818989636" y="156.66666634499015"></omgdi:waypoint>
+        <omgdi:waypoint x="970.5757978288688" y="155.9068173759735"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow7" id="BPMNEdge_flow7">
         <omgdi:waypoint x="464.8637846569869" y="240.81153121536255"></omgdi:waypoint>
         <omgdi:waypoint x="236.66666210139252" y="312.22222358209126"></omgdi:waypoint>
         <omgdi:waypoint x="175.65825760223157" y="184.95000000000002"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow8" id="BPMNEdge_flow8">
-        <omgdi:waypoint x="617.6166560702858" y="147.74616734570662"></omgdi:waypoint>
-        <omgdi:waypoint x="627.0" y="148.0"></omgdi:waypoint>
-        <omgdi:waypoint x="638.0" y="158.0"></omgdi:waypoint>
-        <omgdi:waypoint x="649.9999741713183" y="157.94644438161296"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow11" id="BPMNEdge_flow11">
-        <omgdi:waypoint x="866.65" y="141.66666666666666"></omgdi:waypoint>
+        <omgdi:waypoint x="975.0088056593222" y="149.65478988516398"></omgdi:waypoint>
         <omgdi:waypoint x="880.0" y="115.0"></omgdi:waypoint>
-        <omgdi:waypoint x="930.0185838255072" y="112.3922615556744"></omgdi:waypoint>
+        <omgdi:waypoint x="1059.6687111130527" y="111.90673276936207"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow9" id="BPMNEdge_flow9">
-        <omgdi:waypoint x="689.9449689515457" y="157.04987410992908"></omgdi:waypoint>
-        <omgdi:waypoint x="719.9999741713216" y="157.82051017141762"></omgdi:waypoint>
+        <omgdi:waypoint x="819.6116766791881" y="157.04987410992908"></omgdi:waypoint>
+        <omgdi:waypoint x="849.666681898964" y="157.82051017141762"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow12" id="BPMNEdge_flow12">
-        <omgdi:waypoint x="865.8676470588235" y="169.07632158590306"></omgdi:waypoint>
+        <omgdi:waypoint x="975.7555010679482" y="161.07357135695497"></omgdi:waypoint>
         <omgdi:waypoint x="880.0" y="203.0"></omgdi:waypoint>
-        <omgdi:waypoint x="930.0185838255074" y="200.3922615556744"></omgdi:waypoint>
+        <omgdi:waypoint x="1059.6687111130518" y="199.90673276936207"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow8" id="BPMNEdge_flow8">
+        <omgdi:waypoint x="733.6314730095735" y="159.3139858126203"></omgdi:waypoint>
+        <omgdi:waypoint x="779.6666818989629" y="158.86770462230692"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow33" id="BPMNEdge_flow33">
+        <omgdi:waypoint x="345.86376454638224" y="247.75546294575224"></omgdi:waypoint>
+        <omgdi:waypoint x="436.81449675382396" y="334.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
