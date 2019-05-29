@@ -141,10 +141,10 @@ public class RequestController {
 
 		List<Attachment> attachments = requestService.findAllAttachmentsByLeaveId(Long.valueOf(leaveRequest.getId()));
 
-		if (SecurityUtil.getUsername().equals(leaveRequest.getCreateBy())) {
-			redirectAttributes.addFlashAttribute("error", "You are not authorized to view that page!");
-			return "redirect:/home";
-		}
+//		if (SecurityUtil.getUsername().equals(leaveRequest.getCreateBy())) {
+//			redirectAttributes.addFlashAttribute("error", "You are not authorized to view that page!");
+//			return "redirect:/home";
+//		}
 
 		model.addAttribute("leaveRequest", leaveRequest);
 		model.addAttribute("taskId", myTask.getId());
@@ -159,6 +159,10 @@ public class RequestController {
 	public String processApproveRequest(@ModelAttribute("requestApprovalForm") RequestApprovalDto requestApprovalDto,
 			@RequestParam("file1") MultipartFile file1,
 			BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes) {
+
+	    if(SecurityUtil.hasRole(UserRoleEnum.DESIGN_DPMT_EMPLOYEE.getValue())) {
+	        requestApprovalDto.setIsApproved(ApprovementStageEnum.DESIGN_COMPLETE.getValue());
+        }
 
 	    if(SecurityUtil.hasRole(UserRoleEnum.COST_CONTROL_DPMT_EMPLOYEE.getValue())) {
             requestApprovalDto.setIsApproved(ApprovementStageEnum.COST_CONTROL_APPROVED.getValue());
@@ -201,5 +205,10 @@ public class RequestController {
 		
 		return "redirect:/home";
 	}
+
+	@GetMapping(value="/task/{taskId}")
+    public String showTaskDetails(@PathVariable("taskId") String taskId, Model model) {
+	    return "task-details";
+    }
 
 }

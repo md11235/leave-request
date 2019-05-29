@@ -93,6 +93,7 @@
                         							<input type="hidden" th:value="${leaveRequest.id}" th:field="*{leaveId}"/>
 
                                                     <div th:class="form-group">
+                                                        <label class="control-label" sec:authorize="hasAuthority('DESIGN_DPMT_EMPLOYEE')">上传设计文件</label>
                                                         <label class="control-label" sec:authorize="hasAuthority('COST_CONTROL_DPMT_EMPLOYEE')">上传清单编制文件</label>
                                                         <label class="control-label" sec:authorize="hasAuthority('ENQUIRY_DPTM_EMPLOYEE')">上传招标文件</label>
                                                         <label class="control-label" sec:authorize="hasAuthority('CONSTRUCT_DPTM_EMPLOYE')">上传施工完成现场图片</label>
@@ -100,7 +101,7 @@
                                                     </div>
                         							
                         							<button type="submit" name="action" value="approve" class="btn btn-primary"><span>继续</span></button>
-													<button type="submit" name="action" value="reject" class="btn btn-primary"><span>驳回</span></button>
+													<button type="submit" name="action" value="reject" class="btn btn-primary" sec:authorize="!hasAuthority('DESIGN_DPMT_EMPLOYEE')"><span>驳回</span></button>
                         						</fieldset>
                         					</form>
                         				</div>

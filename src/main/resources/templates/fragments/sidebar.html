@@ -115,7 +115,7 @@
 	                        <li sec:authorize="hasAuthority('DESIGN_DPMT_EMPLOYEE')">
 	                        	<a th:href="@{/request}"><i class="fa fa-edit fa-fw"></i> 发起流程</a>
 	                        </li>
-	                        <li sec:authorize="hasAuthority('COST_CONTROL_DPMT_EMPLOYEE') or hasAuthority('ENQUIRY_DPTM_EMPLOYEE') or hasAuthority('CONSTRUCT_DPTM_EMPLOYEE')">
+	                        <li sec:authorize="hasAuthority('DESIGN_DPMT_EMPLOYEE') or hasAuthority('COST_CONTROL_DPMT_EMPLOYEE') or hasAuthority('ENQUIRY_DPTM_EMPLOYEE') or hasAuthority('CONSTRUCT_DPTM_EMPLOYEE')">
 	                        	<a th:href="@{/manage}"><i class="fa fa-wrench fa-fw"></i> 处理任务</a>
 	                        </li>	                        
 	                    </ul>

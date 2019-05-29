@@ -34,7 +34,8 @@
                      		<span th:text="${requestReviewed}"></span>
                  		</div>                        
 
-                        <div sec:authorize="hasAuthority('DESIGN_DPMT_EMPLOYEE')">
+                        <!--<div sec:authorize="hasAuthority('DESIGN_DPMT_EMPLOYEE')">-->
+                        <div>
                             <label>我发起的流程列表</label>
                             <table id="myLeaves"></table>
                         </div>
@@ -128,13 +129,15 @@
                     return value == undefined ? '-' : moment(value).format("MM/DD/YYYY");
                 }
             }, {
+                field: 'commentList',
+                title: '备注',
+                formatter: function(value, row, index) {
+                    return value[0] == undefined ? '-' : value[0].fullMessage;
+                }
+            }, {
                 field: 'assignee',
                 title: '经办人',
                 sortable: true
-            }, {
-                field: 'operate',
-                title: '操作',
-                formatter: actionFormatter
             }]
         });
 		
