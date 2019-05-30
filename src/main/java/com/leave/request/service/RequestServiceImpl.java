@@ -4,6 +4,7 @@
 package com.leave.request.service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.leave.request.constants.ApprovementStageEnum;
 import com.leave.request.dto.RequestApprovalDto;
 import com.leave.request.model.ConstructionFlowRequest;
 import com.leave.request.repository.LeaveRequestRepository;
@@ -70,9 +72,19 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
+    public Attachment findAttachment(String attachmentId) {
+	    return taskService.getAttachment(attachmentId);
+    }
+
+    @Override
+    public InputStream getAttachmentContentInputStream(String attachmentId) {
+	    return taskService.getAttachmentContent(attachmentId);
+    }
+
+    @Override
 	public void submit(ConstructionFlowRequest leaveRequest, MultipartFile file) {
 		Deployment deployment = repositoryService.createDeployment()
-				.addClasspathResource("processes/Municipal_Landscape_Flow.bpmn20.xml").deploy();
+				.addClasspathResource("processes/Municipal_Landscape_Flow_V2.1.bpmn20.xml").deploy();
 		ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery()
 				.deploymentId(deployment.getId()).singleResult();
 
@@ -98,6 +110,7 @@ public class RequestServiceImpl implements RequestService {
 		variables.put("leaveId", leaveRequest.getId());
 		variables.put("startDate", leaveRequest.getStartDate());
 		variables.put("endDate", leaveRequest.getEndDate());
+		variables.put("isApproved", ApprovementStageEnum.DESIGN_COMPLETE.getValue());
 
 		Task task = taskService.createTaskQuery().processInstanceId(processInstance.getProcessInstanceId())
 				.singleResult();

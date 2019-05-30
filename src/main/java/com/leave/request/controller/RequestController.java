@@ -3,8 +3,10 @@
  */
 package com.leave.request.controller;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.compress.utils.IOUtils;
 import org.flowable.engine.task.Attachment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.leave.request.constants.ApprovementStageEnum;
+import com.leave.request.constants.ClassAContractProcess;
 import com.leave.request.constants.RequestStatusEnum;
 import com.leave.request.constants.UserRoleEnum;
 import com.leave.request.dto.MyHistoryTask;
@@ -31,6 +34,7 @@ import com.leave.request.util.SecurityUtil;
 import com.leave.request.validator.RequestValidator;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author Eraine
@@ -85,7 +89,12 @@ public class RequestController {
 	public String requestView(@PathVariable("id") Long id, Model model) {
 		ConstructionFlowRequest leaveRequest = requestService.findById(id);
 
-		model.addAttribute("leaveRequest", leaveRequest);
+        //MyTask myTask = myTaskService.findTaskByTaskId(String.valueOf(id));
+
+        List<Attachment> attachments = requestService.findAllAttachmentsByLeaveId(Long.valueOf(leaveRequest.getId()));
+
+        model.addAttribute("leaveRequest", leaveRequest);
+        model.addAttribute("attachments", attachments);
 		
 		return "request-view";
 	}
@@ -152,6 +161,27 @@ public class RequestController {
 		model.addAttribute("requestApprovalForm", dto);
 		model.addAttribute("attachments", attachments);
 
+		int currentUndecidedStage = 0;
+
+        if(SecurityUtil.hasRole(UserRoleEnum.DESIGN_DPMT_EMPLOYEE.getValue())) {
+            currentUndecidedStage = ApprovementStageEnum.DESIGN_COMPLETE.getValue();
+        }
+
+        if(SecurityUtil.hasRole(UserRoleEnum.COST_CONTROL_DPMT_EMPLOYEE.getValue())) {
+            currentUndecidedStage = ApprovementStageEnum.COST_CONTROL_APPROVED.getValue();
+        }
+
+        if(SecurityUtil.hasRole(UserRoleEnum.ENQUIRY_DPTM_EMPLOYEE.getValue())) {
+            currentUndecidedStage = ApprovementStageEnum.ENQUIRY_APPROVED.getValue();
+        }
+
+        if(SecurityUtil.hasRole(UserRoleEnum.CONSTRUCT_DPTM_EMPLOYEE.getValue())) {
+            currentUndecidedStage = ApprovementStageEnum.CONSTRUCTION_DONE.getValue();
+        }
+
+        model.addAttribute("undecidedContractStages", ClassAContractProcess.buildStages(currentUndecidedStage));
+
+
 		return "request-review";
 	}
 
@@ -211,4 +241,19 @@ public class RequestController {
 	    return "task-details";
     }
 
+    @GetMapping("/attachment/{id}")
+    public void getAttachmentById(@PathVariable("id") String attachmentId, HttpServletResponse response) {
+        Attachment attachment = requestService.findAttachment(attachmentId);
+
+        response.setContentType(attachment.getType());
+
+        try {
+            IOUtils.copy(requestService.getAttachmentContentInputStream(attachmentId),
+                    response.getOutputStream());
+            response.flushBuffer();
+        } catch (IOException ex) {
+            logger.info("Error downloading attachment: {}", attachment.getName(), ex);
+            throw new RuntimeException("Error downloading attachment");
+        }
+    }
 }

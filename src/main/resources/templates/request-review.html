@@ -99,9 +99,13 @@
                                                         <label class="control-label" sec:authorize="hasAuthority('CONSTRUCT_DPTM_EMPLOYE')">上传施工完成现场图片</label>
                                                         <input type="file" class="form-control" id="file1" th:field="*{file1}" placeholder="上传文件"/>
                                                     </div>
-                        							
                         							<button type="submit" name="action" value="approve" class="btn btn-primary"><span>继续</span></button>
-													<button type="submit" name="action" value="reject" class="btn btn-primary" sec:authorize="!hasAuthority('DESIGN_DPMT_EMPLOYEE')"><span>驳回</span></button>
+                                                    <div>请选择将要驳回到的部门</div>
+                                                    <select th:field="*{returnedTo}">
+                                                        <option th:each="stage: ${undecidedContractStages}" th:value="${stage.value}" th:text="${stage.name}" />
+                                                    </select>
+                                                    <div/>
+                                                    <button type="submit" name="action" value="reject" class="btn btn-primary" sec:authorize="!hasAuthority('DESIGN_DPMT_EMPLOYEE')"><span>驳回</span></button>
                         						</fieldset>
                         					</form>
                         				</div>

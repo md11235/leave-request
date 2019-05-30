@@ -15,6 +15,7 @@ public class RequestApprovalDto {
 	public String leaveId;
 	public String comment;
 	public int isApproved;
+	public int returnedTo;
 
     private MultipartFile file1;
 
@@ -113,5 +114,13 @@ public class RequestApprovalDto {
 
     public void setFile1(MultipartFile file1) {
         this.file1 = file1;
+    }
+
+    public int getReturnedTo() {
+        return returnedTo;
+    }
+
+    public void setReturnedTo(int returnedTo) {
+        this.returnedTo = returnedTo;
     }
 }

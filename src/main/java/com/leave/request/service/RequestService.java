@@ -3,6 +3,7 @@
  */
 package com.leave.request.service;
 
+import java.io.InputStream;
 import java.util.List;
 
 import org.flowable.engine.delegate.DelegateExecution;
@@ -31,5 +32,8 @@ public interface RequestService {
 	void approveOrReject(RequestApprovalDto requestApprovalDto, MultipartFile file);
 
 	List<Attachment> findAllAttachmentsByLeaveId(Long LeaveId);
-	
+
+	Attachment findAttachment(String attachmentId);
+
+    InputStream getAttachmentContentInputStream(String attachmentId);
 }
