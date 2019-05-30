@@ -63,6 +63,12 @@
                         									<td>状态</td>
                         									<td th:text="${leaveRequest.status}"></td>
                         								</tr>
+                                                        <tr th:each="attachment: ${attachments}">
+                                                            <td>附件</td>
+                                                            <td>
+                                                                <a th:text="${attachment.name}" th:href="'/attachment/'+${attachment.id}"/>
+                                                            </td>
+                                                        </tr>
                         							</tbody>
                         						</table>
                         					</div>
